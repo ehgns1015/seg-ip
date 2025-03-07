@@ -4,7 +4,7 @@ export interface FormData {
   MAC: string;
   type: string;
   sharedComputer?: boolean;
-  primaryUser?: string;
+  primaryUser?: string | null;
   note?: string;
-  [key: string]: string | boolean | undefined;
+  [key: string]: string | boolean | null | undefined;
 }

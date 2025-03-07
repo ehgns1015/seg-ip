@@ -1,139 +1,170 @@
 "use client";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import Link from "next/link";
-import Loading from "@/app/loading"; // Importing the Loading component
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { apiService } from "@/app/services/api";
+import Layout from "@/app/components/Layout";
+import Loading from "@/app/loading";
 
 /**
- * SubnetPage component.
- * Displays a list of available IP addresses.
- * @returns {JSX.Element} The SubnetPage component.
+ * Interface for gateway information
  */
-const SubnetPage = () => {
-  const [availableIps, setAvailableIps] = useState<Map<string, string[]>>(
-    new Map()
-  );
-  const [nonavailableIps, setNonavailableIps] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+interface Gateway {
+  ip: string;
+  range: number;
+}
+
+/**
+ * IP List page component.
+ * Displays a list of available IP addresses organized by gateway.
+ *
+ * @returns {JSX.Element} The IP List page component
+ */
+const IPListPage = () => {
+  const [usedIps, setUsedIps] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
+
+  // Get gateways from environment variables
+  const gateways: Gateway[] = useMemo(() => {
+    try {
+      return JSON.parse(process.env.NEXT_PUBLIC_GATEWAYS || "[]");
+    } catch (error) {
+      return [];
+    }
+  }, []);
 
   /**
-   * Array of gateway information.
-   * @type {Array<{ ip: string, range: number }> }
-   */
-  const gateways = JSON.parse(process.env.NEXT_PUBLIC_GATEWAYS || "[]");
-
-  /**
-   * Fetch non-available IP addresses.
-   * @async
-   * @function fetchData
+   * Fetch used IP addresses.
    */
   useEffect(() => {
-    document.title = "SEG IP Management";
     const fetchData = async () => {
       try {
-        const response = await axios.get("/api/units");
-        const ipAddresses: string[] = response.data.map(
-          (unit: { ip: string }) => unit.ip
-        );
-        setNonavailableIps(ipAddresses);
+        const units = await apiService.getAllUnits();
+        const ipAddresses: string[] = units
+          .map((unit: { ip: string }) => unit.ip)
+          .filter(Boolean);
+        setUsedIps(ipAddresses);
       } catch (error) {
-        console.error("Error fetching units:", error); // Log any error encountered during data fetching
+        setError("Failed to load IP data");
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
-   * Generates all IPs in the subnet and checks their availability.
-   * @async
-   * @function checkIps
+   * Generate available IPs for each gateway
    */
-  useEffect(() => {
-    setLoading(true);
-    const checkIps = async () => {
-      const availableIpsMap: Map<string, string[]> = new Map();
+  const gatewayAvailableIps = useMemo(() => {
+    const result = new Map<string, string[]>();
 
-      for (const gateway of gateways) {
-        const baseIp = gateway.ip.split(".").slice(0, 3).join(".");
-        const availableIpsList: string[] = [];
+    gateways.forEach((gateway) => {
+      const baseIp = gateway.ip.split(".").slice(0, 3).join(".");
+      const availableIpsList: string[] = [];
 
-        for (let i = 1; i <= gateway.range; i++) {
-          const ip = `${baseIp}.${i}`;
+      // Ensure the range only goes up to 254 (common networking practice)
+      const maxRange = Math.min(gateway.range, 254);
 
-          // Exclude non-available IPs
-          if (!nonavailableIps.includes(ip)) {
-            availableIpsList.push(i.toString().padStart(3, "0"));
-          }
+      for (let i = 1; i <= maxRange; i++) {
+        const ip = `${baseIp}.${i}`;
+
+        // Add to available list if not in use
+        if (!usedIps.includes(ip)) {
+          availableIpsList.push(i.toString().padStart(3, "0"));
         }
-
-        availableIpsMap.set(gateway.ip, availableIpsList);
       }
 
-      setAvailableIps(availableIpsMap);
-      setLoading(false);
-    };
+      result.set(gateway.ip, availableIpsList);
+    });
 
-    checkIps();
-  }, [nonavailableIps, gateways]); // This effect depends on `nonavailableIps`
+    return result;
+  }, [gateways, usedIps]);
 
   /**
    * Copies the given IP to the clipboard.
-   * @param {string} gatewayIp The gateway IP address.
-   * @param {string} lastOctet The last octet of the IP address.
    */
-  const handleCopy = (gatewayIp: string, lastOctet: string) => {
+  const handleCopy = useCallback((gatewayIp: string, lastOctet: string) => {
     // Convert lastOctet to a number to remove leading zeros
     const ip = `${gatewayIp.split(".").slice(0, 3).join(".")}.${Number(
       lastOctet
     )}`;
+
     navigator.clipboard.writeText(ip).then(
       () => {
-        alert(`${ip} has been copied to the clipboard.`);
+        setCopyMessage(`${ip} copied to clipboard`);
+        setTimeout(() => setCopyMessage(null), 2000);
       },
-      (err) => {
-        console.error("Failed to copy IP:", err);
+      (errror) => {
+        setCopyMessage("Failed to copy IP");
+        setTimeout(() => setCopyMessage(null), 2000);
       }
     );
-  };
+  }, []);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold text-center mb-6">Available IP List</h1>
-      {loading ? (
-        <Loading />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {gateways.map((gateway: { ip: string; range: number }) => (
-            <div key={gateway.ip} className="bg-white p-4 rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold text-center mb-4 sticky top-0 bg-white z-10">
-                {gateway.ip}
-              </h2>
-              <div className="flex flex-col items-center w-full gap-1">
-                {availableIps.get(gateway.ip)?.map((lastOctet) => (
-                  <div
-                    key={`${gateway.ip}-${lastOctet}`} // 게이트웨이 IP와 마지막 옥텟을 결합한 고유 키
-                    className="w-full p-2 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleCopy(gateway.ip, lastOctet)}
-                  >
-                    <span className="block text-center text-sm font-semibold">
-                      {lastOctet}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-          {/* Fixed 'Home' button at the bottom right */}
-          <Link
-            href="/"
-            className="fixed bottom-4 right-4 w-24 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 text-center"
-          >
-            Home
-          </Link>
-        </div>
-      )}
-    </div>
+    <Layout title="Available IP Addresses">
+      <div className="container mx-auto px-4">
+        <h1 className="text-2xl font-bold text-center mb-6">
+          Available IP List
+        </h1>
+
+        {error && (
+          <div className="bg-red-100 text-red-700 p-4 rounded mb-4 text-center">
+            {error}
+          </div>
+        )}
+
+        {copyMessage && (
+          <div className="fixed top-4 right-4 bg-green-100 text-green-800 p-2 rounded shadow-md">
+            {copyMessage}
+          </div>
+        )}
+
+        {loading ? (
+          <Loading />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {gateways.map((gateway) => {
+              const availableIps = gatewayAvailableIps.get(gateway.ip) || [];
+
+              return (
+                <div
+                  key={gateway.ip}
+                  className="bg-white p-4 rounded-lg shadow-md"
+                >
+                  <h2 className="text-xl font-semibold text-center mb-4 sticky top-0 bg-white z-10">
+                    {gateway.ip}
+                  </h2>
+
+                  {availableIps.length === 0 ? (
+                    <p className="text-center text-gray-500">
+                      No available IPs
+                    </p>
+                  ) : (
+                    <div className="flex flex-col items-center w-full gap-1">
+                      {availableIps.map((lastOctet) => (
+                        <div
+                          key={`${gateway.ip}-${lastOctet}`}
+                          className="w-full p-2 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-100"
+                          onClick={() => handleCopy(gateway.ip, lastOctet)}
+                        >
+                          <span className="block text-center text-sm font-semibold">
+                            {lastOctet}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 };
 
-export default SubnetPage;
+export default IPListPage;

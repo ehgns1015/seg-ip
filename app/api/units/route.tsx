@@ -17,7 +17,6 @@ export async function GET() {
     const data = await units.find({}).sort({ ip: 1 }).toArray();
     return NextResponse.json(data);
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { error: "Failed to fetch units" },
       { status: 500 }
@@ -28,9 +27,8 @@ export async function GET() {
 /**
  * Handles the POST request to create a new unit in the database.
  *
- * This function creates a new unit record. It first validates if the required `name` field is provided and checks if
- * the `name` or `ip` already exists in the database. If either exists, it returns an appropriate error message.
- * After successful validation, the new unit is inserted into the database.
+ * This function validates the input, checks for duplicate names and IPs,
+ * and handles the shared computer scenario before creating a new unit.
  *
  * @param {Request} req - The HTTP request object containing the unit data in JSON format.
  * @returns {NextResponse} JSON response containing the newly created unit or an error message.
@@ -46,7 +44,6 @@ export async function POST(req: Request) {
 
     // Check if a unit with the same name already exists
     const existingName = await units.findOne({ name });
-
     if (existingName) {
       return NextResponse.json(
         { error: "Name already exists" },
@@ -56,11 +53,9 @@ export async function POST(req: Request) {
 
     // Handle shared computer scenario
     let finalIp = ip;
-
     if (sharedComputer && primaryUser) {
       // Find the primary user to get their IP
       const primaryUserUnit = await units.findOne({ name: primaryUser });
-
       if (!primaryUserUnit) {
         return NextResponse.json(
           { error: "Primary user not found" },
@@ -99,7 +94,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json(newUnit, { status: 201 }); // Return the newly created unit with status 201
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { error: "Failed to create unit" },
       { status: 500 }

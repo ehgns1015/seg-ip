@@ -3,6 +3,16 @@ import { units } from "@/app/lib/mongo";
 import { ObjectId } from "mongodb";
 
 /**
+ * Helper function to handle server errors consistently
+ *
+ * @param {unknown} error - The error that occurred
+ * @returns {NextResponse} A standardized error response
+ */
+function handleServerError(error: unknown): NextResponse {
+  return NextResponse.json({ error: "Server Error" }, { status: 500 });
+}
+
+/**
  * GET request to retrieve a unit by its name.
  *
  * This function retrieves the unit details from the database using the provided name parameter.
@@ -32,8 +42,7 @@ export async function GET(
 
     return NextResponse.json(unit);
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({ error: "Server Error" }, { status: 500 });
+    return handleServerError(error);
   }
 }
 
@@ -41,7 +50,8 @@ export async function GET(
  * PUT request to update a unit's details by its ID.
  *
  * This function updates an existing unit in the database using the provided unit details and ID.
- * If the unit is not found or an ID is not provided, it returns an error message.
+ * It handles various validation scenarios such as name duplication, IP conflicts,
+ * and shared computer configuration.
  *
  * @param {Request} req - The incoming request object.
  * @returns {NextResponse} JSON response containing either the updated unit data or an error message.
@@ -155,7 +165,6 @@ export async function PUT(req: Request) {
 
     return NextResponse.json(updatedUnit, { status: 200 });
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { error: "Failed to update unit" },
       { status: 500 }
@@ -184,9 +193,9 @@ export async function DELETE(
     if (result.deletedCount === 0) {
       return NextResponse.json({ error: "Unit not found" }, { status: 404 });
     }
+
     return NextResponse.json({ message: "Unit deleted successfully" });
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { error: "Failed to delete unit" },
       { status: 500 }
