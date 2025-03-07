@@ -95,6 +95,21 @@ const Employee = new Map([
    * @property {string} type - The data type of the field, "String".
    */
   ["note", { type: "String" }],
+
+  /**
+   * Primary User for the shared Computer.
+   * @type {Object}
+   * @property {string} type - The data type of the field, "String".
+   */
+  ["primaryUser", { type: "String", sparse: true }],
+
+  /**
+   * Checkbox for the choice of the shared Computer.
+   * @type {Object}
+   * @property {string} type - The data type of the field, "String".
+   */
+  ["sharedComputer", { type: "Boolean", default: false }], // 공유 컴퓨터 플래그
+
   /**
    * The type of entity the employee represents.
    * Defaults to "employee".

@@ -48,7 +48,8 @@ export async function GET(
  */
 export async function PUT(req: Request) {
   try {
-    const { name, ip, _id, ...rest } = await req.json();
+    const { name, ip, _id, sharedComputer, primaryUser, ...rest } =
+      await req.json();
 
     if (!_id) {
       return NextResponse.json({ error: "ID is required" }, { status: 400 });
@@ -63,11 +64,11 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unit not found" }, { status: 404 });
     }
 
-    // 이름이 변경되는 경우 중복 검사 수행
+    // Check for name duplication when name is changing
     if (name && name !== existingUnit.name) {
       const duplicateName = await units.findOne({
         name: name,
-        _id: { $ne: objectId }, // 현재 유닛은 제외
+        _id: { $ne: objectId },
       });
 
       if (duplicateName) {
@@ -78,11 +79,28 @@ export async function PUT(req: Request) {
       }
     }
 
-    // IP가 변경되는 경우 중복 검사 수행
-    if (ip && ip !== existingUnit.ip) {
+    // Handle IP validation and shared computer scenario
+    let finalIp = ip;
+
+    if (sharedComputer && primaryUser) {
+      // Find the primary user to get their IP
+      const primaryUserUnit = await units.findOne({ name: primaryUser });
+
+      if (!primaryUserUnit) {
+        return NextResponse.json(
+          { error: "Primary user not found" },
+          { status: 400 }
+        );
+      }
+
+      // Use the primary user's IP
+      finalIp = primaryUserUnit.ip;
+    } else if (!sharedComputer && ip && ip !== existingUnit.ip) {
+      // Regular IP validation for non-shared computers when IP is changing
       const duplicateIP = await units.findOne({
         ip: ip,
-        _id: { $ne: objectId }, // 현재 유닛은 제외
+        _id: { $ne: objectId },
+        sharedComputer: { $ne: true }, // Exclude shared computers
       });
 
       if (duplicateIP) {
@@ -93,14 +111,21 @@ export async function PUT(req: Request) {
       }
     }
 
-    // 업데이트할 유닛 데이터 준비
+    // Prepare the updated unit data, using existing values if not provided
     const updatedUnit = {
       name: name || existingUnit.name,
-      ip: ip || existingUnit.ip,
+      ip: finalIp || existingUnit.ip,
+      sharedComputer:
+        sharedComputer !== undefined
+          ? sharedComputer
+          : existingUnit.sharedComputer,
+      primaryUser: sharedComputer
+        ? primaryUser || existingUnit.primaryUser
+        : null,
       ...rest,
     };
 
-    // 데이터베이스에서 유닛 업데이트
+    // Update the unit in the database
     await units.updateOne({ _id: objectId }, { $set: updatedUnit });
 
     return NextResponse.json(updatedUnit, { status: 200 });

@@ -37,7 +37,8 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   try {
-    const { name, ip, ...rest } = await req.json(); // Extracts 'name', 'ip', and the rest of the data
+    const { name, ip, sharedComputer, primaryUser, ...rest } = await req.json();
+
     // Validate if 'name' is provided
     if (!name) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -53,9 +54,28 @@ export async function POST(req: Request) {
       );
     }
 
-    // If an IP is provided, check if the IP is already taken
-    if (ip) {
-      const existingIP = await units.findOne({ ip });
+    // Handle shared computer scenario
+    let finalIp = ip;
+
+    if (sharedComputer && primaryUser) {
+      // Find the primary user to get their IP
+      const primaryUserUnit = await units.findOne({ name: primaryUser });
+
+      if (!primaryUserUnit) {
+        return NextResponse.json(
+          { error: "Primary user not found" },
+          { status: 400 }
+        );
+      }
+
+      // Use the primary user's IP
+      finalIp = primaryUserUnit.ip;
+    } else if (!sharedComputer && ip) {
+      // Regular IP validation for non-shared computers
+      const existingIP = await units.findOne({
+        ip,
+        sharedComputer: { $ne: true }, // Exclude shared computers
+      });
 
       if (existingIP) {
         return NextResponse.json(
@@ -66,7 +86,13 @@ export async function POST(req: Request) {
     }
 
     // Prepare the new unit object with the provided data
-    const newUnit = { name: name, ip: ip || "", ...rest };
+    const newUnit = {
+      name,
+      ip: finalIp || "",
+      sharedComputer: sharedComputer || false,
+      primaryUser: sharedComputer ? primaryUser : null,
+      ...rest,
+    };
 
     // Insert the new unit into the database
     await units.insertOne(newUnit);

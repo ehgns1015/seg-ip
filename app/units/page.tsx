@@ -132,9 +132,9 @@ export default function UnitList() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredUnits.map((unit) => (
           <div
-            key={unit.ip}
+            key={unit.name} // 고유한 이름을 키로 사용
             className="bg-white p-4 border rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-            onClick={() => handleBlockClick(unit)} // When a unit block is clicked, select the unit
+            onClick={() => handleBlockClick(unit)}
           >
             <h3 className="text-lg font-semibold">{unit.name}</h3>
             <p className="text-sm text-gray-500">{unit.ip}</p>

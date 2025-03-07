@@ -111,9 +111,9 @@ const SubnetPage = () => {
               <div className="flex flex-col items-center w-full gap-1">
                 {availableIps.get(gateway.ip)?.map((lastOctet) => (
                   <div
-                    key={lastOctet}
+                    key={`${gateway.ip}-${lastOctet}`} // 게이트웨이 IP와 마지막 옥텟을 결합한 고유 키
                     className="w-full p-2 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleCopy(gateway.ip, lastOctet)} // Handle copy on click
+                    onClick={() => handleCopy(gateway.ip, lastOctet)}
                   >
                     <span className="block text-center text-sm font-semibold">
                       {lastOctet}

@@ -35,11 +35,11 @@ const Machine = new Map([
   ["MAC", { type: "String", unique: true, sparse: true }],
 
   /**
-   * The department the machine belongs to.
+   * The line the machine belongs to.
    * @type {Object}
    * @property {string} type - The data type of the field, "String".
    */
-  ["role", { type: "String" }],
+  ["line", { type: "String" }],
 
   /**
    * The type of device the machine is.
