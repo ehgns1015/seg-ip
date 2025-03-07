@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { apiService } from "@/app/services/api";
-import type { FormData } from "@/app/models/formData";
+import type { FormData } from "@/app/types";
 import Layout from "@/app/components/Layout";
 import UnitForm from "@/app/components/UnitForm";
 import Loading from "@/app/loading";
@@ -28,7 +28,19 @@ export default function EditPage() {
       try {
         // Fetch the unit data
         const unit = await apiService.getUnitByName(name);
-        setFormData(unit);
+
+        // Ensure all required FormData properties exist with correct types
+        const formattedData: FormData = {
+          ...unit,
+          name: unit.name || "",
+          ip: unit.ip || "",
+          MAC: typeof unit.MAC === "string" ? unit.MAC : String(unit.MAC || ""),
+          type: unit.type || "employee",
+          sharedComputer: Boolean(unit.sharedComputer),
+          primaryUser: unit.primaryUser || null,
+        };
+
+        setFormData(formattedData);
         document.title = unit.ip || "Edit Unit";
 
         // Parse field configurations
@@ -42,6 +54,7 @@ export default function EditPage() {
         setEmployeeFields(employeeFieldsData);
         setMachineFields(machineFieldsData);
       } catch (error) {
+        console.log("Error fetching unit:", error);
         setError("Failed to load data");
       } finally {
         setLoading(false);

@@ -66,7 +66,8 @@ export const ipToInt = (ip: string): number => {
         return (acc << 8) + parseInt(octet, 10);
       }, 0) >>> 0
     ); // Unsigned right shift to ensure non-negative result
-  } catch (error) {
+  } catch (e) {
+    console.log("Error converting IP to integer:", e);
     return 0;
   }
 };

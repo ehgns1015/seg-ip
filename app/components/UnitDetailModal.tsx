@@ -2,13 +2,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { labeling } from "@/app/functions/functions";
 
-interface Unit {
-  name: string;
-  ip: string;
-  type: "employee" | "machine";
-  note?: string;
-  [key: string]: any;
-}
+import type { Unit } from "@/app/types";
 
 interface UnitDetailModalProps {
   unit: Unit;

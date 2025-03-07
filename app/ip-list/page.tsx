@@ -28,7 +28,8 @@ const IPListPage = () => {
   const gateways: Gateway[] = useMemo(() => {
     try {
       return JSON.parse(process.env.NEXT_PUBLIC_GATEWAYS || "[]");
-    } catch (error) {
+    } catch (e) {
+      console.log("Error parsing gateways:", e);
       return [];
     }
   }, []);
@@ -45,6 +46,7 @@ const IPListPage = () => {
           .filter(Boolean);
         setUsedIps(ipAddresses);
       } catch (error) {
+        console.log("Error fetching units:", error);
         setError("Failed to load IP data");
       } finally {
         setLoading(false);
@@ -96,7 +98,8 @@ const IPListPage = () => {
         setCopyMessage(`${ip} copied to clipboard`);
         setTimeout(() => setCopyMessage(null), 2000);
       },
-      (errror) => {
+      (err) => {
+        console.log("Failed to copy IP:", err);
         setCopyMessage("Failed to copy IP");
         setTimeout(() => setCopyMessage(null), 2000);
       }

@@ -42,6 +42,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Available." }, { status: 201 });
   } catch (error) {
     // Handle server error by returning a 500 status
+    console.log("Error checking IP:", error);
     return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }

@@ -5,23 +5,17 @@ import { ObjectId } from "mongodb";
 /**
  * Helper function to handle server errors consistently
  *
- * @param {unknown} error - The error that occurred
+ * @param {unknown} errorObj - The error that occurred
+ * @param {string} message - Custom error message
  * @returns {NextResponse} A standardized error response
  */
-function handleServerError(error: unknown): NextResponse {
+function handleServerError(errorObj: unknown, message: string): NextResponse {
+  console.error(`${message}:`, errorObj);
   return NextResponse.json({ error: "Server Error" }, { status: 500 });
 }
 
 /**
  * GET request to retrieve a unit by its name.
- *
- * This function retrieves the unit details from the database using the provided name parameter.
- * If no name is provided or the unit is not found, it returns an error message.
- *
- * @param {Request} req - The incoming request object.
- * @param {Object} params - The parameters containing the unit name.
- * @param {string} params.name - The name of the unit to retrieve.
- * @returns {NextResponse} JSON response containing either the unit data or an error message.
  */
 export async function GET(
   req: Request,
@@ -41,20 +35,13 @@ export async function GET(
     }
 
     return NextResponse.json(unit);
-  } catch (error) {
-    return handleServerError(error);
+  } catch (errorObj) {
+    return handleServerError(errorObj, "Error retrieving unit");
   }
 }
 
 /**
  * PUT request to update a unit's details by its ID.
- *
- * This function updates an existing unit in the database using the provided unit details and ID.
- * It handles various validation scenarios such as name duplication, IP conflicts,
- * and shared computer configuration.
- *
- * @param {Request} req - The incoming request object.
- * @returns {NextResponse} JSON response containing either the updated unit data or an error message.
  */
 export async function PUT(req: Request) {
   try {
@@ -164,24 +151,13 @@ export async function PUT(req: Request) {
     await units.updateOne({ _id: objectId }, { $set: updatedUnit });
 
     return NextResponse.json(updatedUnit, { status: 200 });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to update unit" },
-      { status: 500 }
-    );
+  } catch (errorObj) {
+    return handleServerError(errorObj, "Failed to update unit");
   }
 }
 
 /**
  * DELETE request to delete a unit by its name.
- *
- * This function deletes a unit from the database using the provided name parameter.
- * If the unit is not found, it returns an error message.
- *
- * @param {Request} req - The incoming request object.
- * @param {Object} params - The parameters containing the unit name.
- * @param {string} params.name - The name of the unit to delete.
- * @returns {NextResponse} JSON response confirming the deletion or an error message.
  */
 export async function DELETE(
   req: Request,
@@ -195,10 +171,7 @@ export async function DELETE(
     }
 
     return NextResponse.json({ message: "Unit deleted successfully" });
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to delete unit" },
-      { status: 500 }
-    );
+  } catch (errorObj) {
+    return handleServerError(errorObj, "Failed to delete unit");
   }
 }

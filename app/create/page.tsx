@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Layout from "@/app/components/Layout";
 import UnitForm from "@/app/components/UnitForm";
-import { FormData } from "@/app/models/formData";
+import type { FormData } from "@/app/types";
 
 /**
  * CreatePage component allows the user to create a new unit (either an employee or a machine).

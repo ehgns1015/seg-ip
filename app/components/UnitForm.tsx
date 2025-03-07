@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { IPv4Regex, useIPValidation } from "@/app/hooks/useIPValidation";
-import type { FormData } from "@/app/models/formData";
+import type { FormData } from "@/app/types";
 import { apiService } from "@/app/services/api";
 import FormField from "./FormField";
 
@@ -53,35 +53,6 @@ const UnitForm: React.FC<UnitFormProps> = ({
     useIPValidation();
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch employees for primary user selection
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const allUnits = await apiService.getAllUnits();
-        const employeesList = allUnits.filter(
-          (unit: { type?: string; name: string; ip: string }) =>
-            (unit.type === "employee" || !unit.type) &&
-            (mode !== "edit" || unit.name !== initialData?.name)
-        );
-        setEmployees(employeesList);
-      } catch (error) {
-        setError(apiService.handleError(error));
-        clearErrorAfterDelay();
-      }
-    };
-
-    fetchEmployees();
-  }, [initialData?.name, mode]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
   /**
    * Clears the error message after a delay.
    */
@@ -94,6 +65,36 @@ const UnitForm: React.FC<UnitFormProps> = ({
       setError("");
       timeoutRef.current = null;
     }, delay);
+  }, []);
+
+  // Fetch employees for primary user selection
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const allUnits = await apiService.getAllUnits();
+        const employeesList = allUnits.filter(
+          (unit: { type?: string; name: string; ip: string }) =>
+            (unit.type === "employee" || !unit.type) &&
+            (mode !== "edit" || unit.name !== initialData?.name)
+        );
+        setEmployees(employeesList);
+      } catch (error) {
+        console.log("Error fetching employees:", error);
+        setError(apiService.handleError(error));
+        clearErrorAfterDelay();
+      }
+    };
+
+    fetchEmployees();
+  }, [initialData?.name, mode, clearErrorAfterDelay]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   /**

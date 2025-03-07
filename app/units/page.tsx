@@ -6,16 +6,7 @@ import { apiService } from "@/app/services/api";
 import { ipToInt } from "@/app/functions/functions";
 import Loading from "@/app/loading";
 
-// Unit Interface Definition
-interface Unit {
-  _id: string;
-  ip: string;
-  name: string;
-  type: "employee" | "machine";
-  department?: string;
-  note?: string;
-  [key: string]: any;
-}
+import type { Unit } from "@/app/types";
 
 /**
  * UnitList component fetches, filters, and displays a list of units (employees or machines).
@@ -40,6 +31,7 @@ export default function UnitList() {
         const data = await apiService.getAllUnits();
         setUnits(data);
       } catch (error) {
+        console.log("Error fetching units:", error);
         setError("Failed to load units");
       } finally {
         setLoading(false);

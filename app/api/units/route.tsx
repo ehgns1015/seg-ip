@@ -17,6 +17,7 @@ export async function GET() {
     const data = await units.find({}).sort({ ip: 1 }).toArray();
     return NextResponse.json(data);
   } catch (error) {
+    console.log("Failed to fetch units:", error);
     return NextResponse.json(
       { error: "Failed to fetch units" },
       { status: 500 }
@@ -94,6 +95,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(newUnit, { status: 201 }); // Return the newly created unit with status 201
   } catch (error) {
+    console.log("Failed to create unit:", error);
     return NextResponse.json(
       { error: "Failed to create unit" },
       { status: 500 }
