@@ -67,7 +67,7 @@ const Employee = new Map([
    * @type {Object}
    * @property {string} type - The data type of the field, "String".
    */
-  ["pw", { type: "String" }],
+  ["ePw", { type: "String" }],
 
   /**
    * The badge number assigned to the employee.
@@ -77,19 +77,24 @@ const Employee = new Map([
   ["badge", { type: "String" }],
 
   /**
-   * The employee's EA (Executive Assistant) name or identifier.
+   * The employee's Windows Username or identifier.
    * @type {Object}
    * @property {string} type - The data type of the field, "String".
    */
-  ["ea", { type: "String" }],
+  ["username", { type: "String" }],
 
   /**
-   * The password for the employee's EA account.
+   * The password for the employee's Windows account.
    * @type {Object}
    * @property {string} type - The data type of the field, "String".
    */
-  ["eaPw", { type: "String" }],
-
+  ["pw", { type: "String" }],
+  /**
+   * Notes or additional information about the employee.
+   * @type {Object}
+   * @property {string} type - The data type of the field, "String".
+   */
+  ["note", { type: "String" }],
   /**
    * The type of entity the employee represents.
    * Defaults to "employee".

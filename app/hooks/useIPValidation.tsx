@@ -45,12 +45,14 @@ export const useIPValidation = () => {
       // Handling error case by setting the error message from the response
       if (axios.isAxiosError(error) && error.response) {
         // Server responded
-        setIPValidationMessage(
-          error.response.data.message
-        );
+        setIPValidationMessage(error.response.data.message);
       } else {
         // Server Not responded
         setIPValidationMessage("Error checking IP");
+        // Clear error message after 3 seconds
+        setTimeout(() => {
+          setIPValidationMessage("");
+        }, 3000);
       }
     }
   };
@@ -63,25 +65,25 @@ export const useIPValidation = () => {
    * @async
    * @param {string} ip - The IP address to check for duplication.
    */
-  const checkAvailableIP = async (ip: string) => {
+  const checkAvailableIP = async (
+    ip: string
+  ): Promise<{ available: boolean; message: string }> => {
     try {
-      // Sending the IP to the backend to check for duplication
       const response = await axios.post("/api/units/check-ip", { ip });
-      if (response.status == 400) {
-        return false;
+      if (response.status === 400) {
+        return { available: false, message: "IP Address Already Exists." };
       }
-      return true;
+      return { available: true, message: "Available." };
     } catch (error) {
-      console.log(error)
-      return "Error checking IP";
+      console.log(error);
+      return { available: false, message: "Error checking IP" };
     }
   };
-  
+
   return {
     IPValidationMessage, // The current IP validation message
     checkDuplicateIP, // Function to check IP duplication
-    checkAvailableIP, // Function to check IP Availability    
+    checkAvailableIP, // Function to check IP Availability
     setIPValidationMessage, // Function to set IP Availability message
   };
 };
-

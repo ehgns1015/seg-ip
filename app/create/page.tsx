@@ -46,6 +46,7 @@ export default function CreatePage() {
     const employeeFieldsData = process.env.NEXT_PUBLIC_EMPLOYEE_FIELDS
       ? JSON.parse(process.env.NEXT_PUBLIC_EMPLOYEE_FIELDS)
       : [];
+    console.log(employeeFieldsData);
     const machineFieldsData = process.env.NEXT_PUBLIC_MACHINE_FIELDS
       ? JSON.parse(process.env.NEXT_PUBLIC_MACHINE_FIELDS)
       : [];
@@ -72,6 +73,10 @@ export default function CreatePage() {
       console.log(error);
       // Set error message if POST request fails
       setError("Error saving data");
+      // Clear error message after 3 seconds
+      setTimeout(() => {
+        setError("");
+      }, 3000);
     }
   };
 

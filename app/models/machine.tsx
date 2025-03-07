@@ -75,6 +75,26 @@ const Machine = new Map([
    * @property {boolean} type - The data type of the field, "Boolean".
    */
   ["PLC", { type: "Boolean" }],
+  /**
+   * The employee's Windows Username or identifier.
+   * @type {Object}
+   * @property {string} type - The data type of the field, "String".
+   */
+  ["username", { type: "String" }],
+
+  /**
+   * The password for the employee's Windows account.
+   * @type {Object}
+   * @property {string} type - The data type of the field, "String".
+   */
+  ["pw", { type: "String" }],
+
+  /**
+   * Notes or additional information about the employee.
+   * @type {Object}
+   * @property {string} type - The data type of the field, "String".
+   */
+  ["note", { type: "String" }],
 
   /**
    * The type of entity the machine represents.

@@ -96,6 +96,10 @@ export default function EditPage() {
         // Non-AxiosError
         setError("Server Error");
       }
+      // Clear error message after 3 seconds
+      setTimeout(() => {
+        setError("");
+      }, 3000);
     }
   };
 
@@ -135,6 +139,10 @@ export default function EditPage() {
         // Non-AxiosError
         setError("Server Error");
       }
+      // Clear error message after 3 seconds
+      setTimeout(() => {
+        setError("");
+      }, 3000);
     }
   };
 

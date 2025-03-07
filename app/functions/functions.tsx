@@ -9,7 +9,9 @@
  */
 export const labeling = (key: string): string => {
   let label: string = "";
-
+  if (key === "pw") {
+    console.log("pw in");
+  }
   // Switch-case structure to return the appropriate label for the given key
   switch (key) {
     case "name":
@@ -33,7 +35,7 @@ export const labeling = (key: string): string => {
     case "email":
       label = "E-mail";
       break;
-    case "pw":
+    case "ePw":
       label = "E-mail Password";
       break;
     case "badge":
@@ -59,6 +61,15 @@ export const labeling = (key: string): string => {
       break;
     case "PLC":
       label = "PLC";
+      break;
+    case "username":
+      label = "Windows Username";
+      break;
+    case "pw":
+      label = "Windows Password";
+      break;
+    case "note":
+      label = "Note";
       break;
     default:
       break;

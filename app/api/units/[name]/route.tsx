@@ -63,14 +63,44 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unit not found" }, { status: 404 });
     }
 
-    // Prepare the updated unit data, using existing values if not provided
+    // 이름이 변경되는 경우 중복 검사 수행
+    if (name && name !== existingUnit.name) {
+      const duplicateName = await units.findOne({
+        name: name,
+        _id: { $ne: objectId }, // 현재 유닛은 제외
+      });
+
+      if (duplicateName) {
+        return NextResponse.json(
+          { error: "Name already exists" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // IP가 변경되는 경우 중복 검사 수행
+    if (ip && ip !== existingUnit.ip) {
+      const duplicateIP = await units.findOne({
+        ip: ip,
+        _id: { $ne: objectId }, // 현재 유닛은 제외
+      });
+
+      if (duplicateIP) {
+        return NextResponse.json(
+          { error: "IP already exists" },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 업데이트할 유닛 데이터 준비
     const updatedUnit = {
       name: name || existingUnit.name,
       ip: ip || existingUnit.ip,
       ...rest,
     };
 
-    // Update the unit in the database
+    // 데이터베이스에서 유닛 업데이트
     await units.updateOne({ _id: objectId }, { $set: updatedUnit });
 
     return NextResponse.json(updatedUnit, { status: 200 });

@@ -28,6 +28,7 @@ export default function UnitList() {
   const [units, setUnits] = useState<Unit[]>([]); // State to store the list of units
   const [search, setSearch] = useState(""); // State to store the search query
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null); // State to store the selected unit for viewing details
+  const [noteText, setNoteText] = useState<string>("");
 
   /**
    * Fetch unit data from the API when the component mounts.
@@ -56,6 +57,7 @@ export default function UnitList() {
    */
   const handleBlockClick = (unit: Unit) => {
     setSelectedUnit(unit);
+    setNoteText(unit.note ? (unit.note as string) : "");
   };
 
   /**
@@ -146,15 +148,33 @@ export default function UnitList() {
         <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-96 relative">
             <h3 className="text-2xl font-bold mb-4">{selectedUnit.name}</h3>
-            {/* Display additional unit details dynamically */}
-            {Object.keys(selectedUnit).map(
-              (key) =>
-                !["name", "_id", "type"].includes(key) && (
-                  <p key={key}>
-                    <strong>{labeling(key)}</strong>: {selectedUnit[key]}
-                  </p>
-                )
-            )}
+
+            {/* Display regular unit details */}
+            {Object.keys(selectedUnit).map((key) => {
+              // Skip these fields from display
+              if (["name", "_id", "type", "note"].includes(key)) {
+                return null;
+              }
+
+              return (
+                <p key={key}>
+                  <strong>{labeling(key)}</strong>: {selectedUnit[key]}
+                </p>
+              );
+            })}
+
+            {/* Special handling for Note field - always display in TextBox */}
+            <div className="mt-4">
+              <label className="block mb-2 font-medium">
+                {labeling("note")}
+              </label>
+              <textarea
+                className="w-full p-2 border rounded resize-vertical"
+                rows={4}
+                value={noteText}
+                readOnly
+              />
+            </div>
 
             {/* Modal buttons */}
             <div className="mt-4 space-x-4 flex justify-end">
