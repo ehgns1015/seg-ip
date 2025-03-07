@@ -93,17 +93,24 @@ const IPListPage = () => {
       lastOctet
     )}`;
 
-    navigator.clipboard.writeText(ip).then(
-      () => {
-        setCopyMessage(`${ip} copied to clipboard`);
-        setTimeout(() => setCopyMessage(null), 2000);
-      },
-      (err) => {
-        console.log("Failed to copy IP:", err);
-        setCopyMessage("Failed to copy IP");
-        setTimeout(() => setCopyMessage(null), 2000);
-      }
-    );
+    // Create a temporary input element
+    const tempInput = document.createElement("input");
+    tempInput.value = ip;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+
+    try {
+      // Execute copy command
+      document.execCommand("copy");
+      setCopyMessage(`${ip} copied to clipboard`);
+    } catch (err) {
+      console.log("Failed to copy IP:", err);
+      setCopyMessage("Failed to copy IP");
+    } finally {
+      // Clean up
+      document.body.removeChild(tempInput);
+      setTimeout(() => setCopyMessage(null), 2000);
+    }
   }, []);
 
   return (
