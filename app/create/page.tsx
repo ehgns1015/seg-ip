@@ -63,7 +63,8 @@ export default function CreatePage() {
       try {
         const response = await axios.get("/api/units");
         const employeesList = response.data.filter(
-          (unit: any) => unit.type === "employee" || !unit.type
+          (unit: { type?: string; name: string; ip: string }) =>
+            unit.type === "employee" || !unit.type
         );
         setEmployees(employeesList);
       } catch (error) {
@@ -82,16 +83,19 @@ export default function CreatePage() {
    * @param {React.FormEvent} e - The form submission event
    * @returns {Promise<void>}
    */
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       // POST request to save unit data
       await axios.post("/api/units", { ...formData, type });
       router.push("/units"); // Redirect to the units page after successful submission
     } catch (error: any) {
-      console.log(error);
       // Set error message if POST request fails
-      setError(error.response?.data?.error || "Error saving data");
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.error || "Error saving data");
+      } else {
+        setError("Error saving data");
+      }
 
       // Clear error message after 3 seconds
       setTimeout(() => {
@@ -252,7 +256,11 @@ export default function CreatePage() {
                 </label>
                 <textarea
                   name={field.name}
-                  value={formData[field.name] || ""}
+                  value={
+                    formData[field.name] !== undefined
+                      ? String(formData[field.name])
+                      : ""
+                  }
                   onChange={handleChange}
                   className="w-full p-2 border rounded resize-vertical"
                   rows={4}
@@ -269,7 +277,11 @@ export default function CreatePage() {
               <input
                 name={field.name}
                 type={field.type}
-                value={formData[field.name] || ""}
+                value={
+                  formData[field.name] !== undefined
+                    ? String(formData[field.name])
+                    : ""
+                }
                 onChange={handleChange}
                 className={`w-full p-2 border rounded ${
                   field.type === "checkbox" ? "w-auto" : ""

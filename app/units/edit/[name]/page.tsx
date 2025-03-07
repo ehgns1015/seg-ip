@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import Employee from "@/app/models/employee"; // Correct import statement
@@ -152,8 +152,16 @@ export default function EditPage() {
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Ensure primaryUser is null (not empty string) when sharedComputer is false
+    const dataToSubmit = {
+      ...formData,
+      // This ensures primaryUser is always null when sharedComputer is false
+      primaryUser: formData.sharedComputer ? formData.primaryUser : null,
+    };
+
     try {
-      await axios.put(`/api/units/${name}`, formData); // Send updated data to the server
+      await axios.put(`/api/units/${name}`, dataToSubmit); // Send updated data to the server
       router.push("/units"); // Redirect to unit list page after successful update
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
@@ -178,7 +186,6 @@ export default function EditPage() {
    * @param {React.ChangeEvent<HTMLInputElement>} e - The change event triggered by the input field
    * @returns {void}
    */
-  // handleChange 함수 수정
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -192,7 +199,7 @@ export default function EditPage() {
       setFormData({
         ...formData,
         sharedComputer: isChecked,
-        // if sharedComputer is false, delete primaryUser
+        // If sharedComputer is false, always clear primaryUser
         primaryUser: isChecked ? formData.primaryUser : "",
       });
     } else {
@@ -259,6 +266,14 @@ export default function EditPage() {
 
       // Skip rendering the IP field if shared computer is selected
       if (key === "ip" && formData.sharedComputer) {
+        return null;
+      }
+
+      // Skip rendering primaryUser field when sharedComputer is false
+      if (
+        key === "primaryUser" &&
+        (!formData.sharedComputer || formData.type !== "employee")
+      ) {
         return null;
       }
 

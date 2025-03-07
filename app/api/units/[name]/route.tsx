@@ -81,8 +81,12 @@ export async function PUT(req: Request) {
 
     // Handle IP validation and shared computer scenario
     let finalIp = ip;
+    const finalSharedComputer =
+      sharedComputer !== undefined
+        ? sharedComputer
+        : existingUnit.sharedComputer;
 
-    if (sharedComputer && primaryUser) {
+    if (finalSharedComputer === true && primaryUser) {
       // Find the primary user to get their IP
       const primaryUserUnit = await units.findOne({ name: primaryUser });
 
@@ -95,33 +99,54 @@ export async function PUT(req: Request) {
 
       // Use the primary user's IP
       finalIp = primaryUserUnit.ip;
-    } else if (!sharedComputer && ip && ip !== existingUnit.ip) {
-      // Regular IP validation for non-shared computers when IP is changing
-      const duplicateIP = await units.findOne({
-        ip: ip,
-        _id: { $ne: objectId },
-        sharedComputer: { $ne: true }, // Exclude shared computers
-      });
+    } else if (!finalSharedComputer) {
+      // When switching from shared to non-shared OR when changing IP for a non-shared computer
+      const isChangingFromSharedToNonShared =
+        existingUnit.sharedComputer === true && finalSharedComputer === false;
+      const isChangingIP = ip && ip !== existingUnit.ip;
 
-      if (duplicateIP) {
-        return NextResponse.json(
-          { error: "IP already exists" },
-          { status: 400 }
-        );
+      // Check IP conflicts when either changing from shared to non-shared or changing IP
+      if (isChangingFromSharedToNonShared || isChangingIP) {
+        const ipToCheck = finalIp || ip || existingUnit.ip;
+
+        // Skip validation if no IP is provided and unit is changing from shared to non-shared
+        if (!ipToCheck && isChangingFromSharedToNonShared) {
+          return NextResponse.json(
+            {
+              error:
+                "IP is required when changing from shared to non-shared computer",
+            },
+            { status: 400 }
+          );
+        }
+
+        const duplicateIP = await units.findOne({
+          ip: ipToCheck,
+          _id: { $ne: objectId },
+          sharedComputer: { $ne: true }, // Exclude shared computers
+        });
+
+        if (duplicateIP) {
+          return NextResponse.json(
+            { error: "IP already exists" },
+            { status: 400 }
+          );
+        }
       }
     }
 
-    // Prepare the updated unit data, using existing values if not provided
+    // Always set primaryUser to null when sharedComputer is false
+    let finalPrimaryUser = null;
+    if (finalSharedComputer === true) {
+      finalPrimaryUser = primaryUser || existingUnit.primaryUser;
+    }
+
+    // Prepare the updated unit data
     const updatedUnit = {
       name: name || existingUnit.name,
       ip: finalIp || existingUnit.ip,
-      sharedComputer:
-        sharedComputer !== undefined
-          ? sharedComputer
-          : existingUnit.sharedComputer,
-      primaryUser: sharedComputer
-        ? primaryUser || existingUnit.primaryUser
-        : null,
+      sharedComputer: finalSharedComputer,
+      primaryUser: finalPrimaryUser,
       ...rest,
     };
 

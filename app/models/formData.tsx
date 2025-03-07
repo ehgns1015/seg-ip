@@ -6,5 +6,5 @@ export interface FormData {
   sharedComputer?: boolean;
   primaryUser?: string;
   note?: string;
-  [key: string]: any;
+  [key: string]: string | boolean | undefined;
 }

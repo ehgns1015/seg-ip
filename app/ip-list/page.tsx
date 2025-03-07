@@ -74,7 +74,7 @@ const SubnetPage = () => {
     };
 
     checkIps();
-  }, [nonavailableIps]); // This effect depends on `nonavailableIps`
+  }, [nonavailableIps, gateways]); // This effect depends on `nonavailableIps`
 
   /**
    * Copies the given IP to the clipboard.
