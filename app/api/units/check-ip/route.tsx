@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { units } from "@/app/lib/mongo";
-import { IPv4Regex } from "@/app/hooks/useIPValidation";
+
+// Define the regex directly in the server component to avoid import issues
+const IPv4Regex =
+  /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
 /**
  * POST request to check if an IP address already exists in the database.

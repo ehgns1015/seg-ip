@@ -1,6 +1,10 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { labeling } from "@/app/functions/functions";
+import {
+  getFieldOrder,
+  sortObjectKeysByFieldOrder,
+} from "@/app/functions/fieldOrder";
 
 import type { Unit } from "@/app/types";
 
@@ -19,12 +23,19 @@ interface UnitDetailModalProps {
  */
 const UnitDetailModal: React.FC<UnitDetailModalProps> = ({ unit, onClose }) => {
   const router = useRouter();
+  const { employeeFields, machineFields } = getFieldOrder();
 
   const handleEdit = () => {
     router.push(`/units/edit/${unit.name}`);
   };
 
   const excludedFields = ["name", "_id", "type", "note", "__v"];
+
+  // Determine which field order to use based on unit type
+  const fieldOrder = unit.type === "machine" ? machineFields : employeeFields;
+
+  // Get sorted keys based on our field order
+  const sortedKeys = sortObjectKeysByFieldOrder(unit, fieldOrder);
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
@@ -33,7 +44,7 @@ const UnitDetailModal: React.FC<UnitDetailModalProps> = ({ unit, onClose }) => {
 
         {/* Display regular unit details */}
         <div className="space-y-2 mb-4">
-          {Object.keys(unit).map((key) => {
+          {sortedKeys.map((key) => {
             // Skip excluded fields
             if (excludedFields.includes(key)) {
               return null;

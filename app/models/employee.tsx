@@ -26,6 +26,13 @@ const Employee = new Map([
   ["ip", { type: "String", unique: true, sparse: true }],
 
   /**
+   * The department where the employee works.
+   * @type {Object}
+   * @property {string} type - The data type of the field, "String".
+   */
+
+  ["department", { type: "String" }],
+  /**
    * The MAC address of the employee's machine.
    * @type {Object}
    * @property {string} type - The data type of the field, "String".
@@ -33,13 +40,6 @@ const Employee = new Map([
    * @property {boolean} sparse - Allows null values in the field.
    */
   ["MAC", { type: "String", unique: true, sparse: true }],
-
-  /**
-   * The department where the employee works.
-   * @type {Object}
-   * @property {string} type - The data type of the field, "String".
-   */
-  ["department", { type: "String" }],
 
   /**
    * The employee's assigned PC identifier.
@@ -89,12 +89,6 @@ const Employee = new Map([
    * @property {string} type - The data type of the field, "String".
    */
   ["pw", { type: "String" }],
-  /**
-   * Notes or additional information about the employee.
-   * @type {Object}
-   * @property {string} type - The data type of the field, "String".
-   */
-  ["note", { type: "String" }],
 
   /**
    * Primary User for the shared Computer.
@@ -109,6 +103,13 @@ const Employee = new Map([
    * @property {string} type - The data type of the field, "String".
    */
   ["sharedComputer", { type: "Boolean", default: false }], // 공유 컴퓨터 플래그
+
+  /**
+   * Notes or additional information about the employee.
+   * @type {Object}
+   * @property {string} type - The data type of the field, "String".
+   */
+  ["note", { type: "String" }],
 
   /**
    * The type of entity the employee represents.

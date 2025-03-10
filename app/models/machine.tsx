@@ -24,16 +24,6 @@ const Machine = new Map([
    * @property {boolean} sparse - Allows null values in the field.
    */
   ["ip", { type: "String", unique: true, sparse: true }],
-
-  /**
-   * The MAC address of the machine.
-   * @type {Object}
-   * @property {string} type - The data type of the field, "String".
-   * @property {boolean} unique - Whether the MAC address must be unique.
-   * @property {boolean} sparse - Allows null values in the field.
-   */
-  ["MAC", { type: "String", unique: true, sparse: true }],
-
   /**
    * The line the machine belongs to.
    * @type {Object}
@@ -47,6 +37,15 @@ const Machine = new Map([
    * @property {string} type - The data type of the field, "String".
    */
   ["device", { type: "String" }],
+
+  /**
+   * The MAC address of the machine.
+   * @type {Object}
+   * @property {string} type - The data type of the field, "String".
+   * @property {boolean} unique - Whether the MAC address must be unique.
+   * @property {boolean} sparse - Allows null values in the field.
+   */
+  ["MAC", { type: "String", unique: true, sparse: true }],
 
   /**
    * The first connected printer to the machine.
@@ -75,6 +74,7 @@ const Machine = new Map([
    * @property {boolean} type - The data type of the field, "Boolean".
    */
   ["PLC", { type: "Boolean" }],
+
   /**
    * The employee's Windows Username or identifier.
    * @type {Object}
