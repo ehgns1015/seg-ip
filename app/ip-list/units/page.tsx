@@ -128,10 +128,9 @@ export default function UnitList() {
                 {unit.department && (
                   <p className="text-sm text-gray-600">{unit.department}</p>
                 )}
-                {/* Modified section - removed type display, kept only "Shared" indicator */}
                 <div className="mt-2">
                   {unit.sharedComputer && (
-                    <span className="inline-block px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">
+                    <span className="inline-block ml-2 px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">
                       Shared
                     </span>
                   )}

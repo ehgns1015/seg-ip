@@ -17,7 +17,8 @@ const ButtonLink: React.FC<{
   href: string;
   color: string;
   children: React.ReactNode;
-}> = ({ href, color, children }) => {
+  className?: string;
+}> = ({ href, color, children, className = "" }) => {
   const hoverColor = color.replace(
     /bg-(\w+)-(\d+)/,
     "bg-$1-" + (parseInt("$2") + 100)
@@ -26,7 +27,7 @@ const ButtonLink: React.FC<{
   return (
     <Link
       href={href}
-      className={`w-40 ${color} text-white py-3 px-6 rounded-lg hover:${hoverColor} text-center font-medium transition-colors duration-200`}
+      className={`${color} text-white py-3 px-6 rounded-lg hover:${hoverColor} text-center font-medium transition-colors duration-200 ${className}`}
     >
       {children}
     </Link>
@@ -47,7 +48,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md space-y-6 text-center max-w-lg w-full">
+      <div className="bg-white p-8 rounded-lg shadow-md space-y-6 text-center max-w-4xl w-full">
         <h1 className="text-3xl font-bold text-gray-800">
           IP Management System
         </h1>
@@ -63,18 +64,40 @@ export default function Home() {
           />
         </div>
 
-        <div className="flex flex-col items-center gap-4">
-          <ButtonLink href="/create" color="bg-blue-500">
-            Create New
-          </ButtonLink>
+        <div className="flex flex-row gap-8">
+          {/* Left column - IP related buttons */}
+          <div className="flex flex-col flex-1 gap-4">
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">
+              IP Management
+            </h2>
+            <ButtonLink href="/create" color="bg-blue-500" className="w-full">
+              Create New
+            </ButtonLink>
+            <ButtonLink
+              href="/ip-list"
+              color="bg-yellow-500"
+              className="w-full"
+            >
+              Available IP
+            </ButtonLink>
+            <ButtonLink href="/units" color="bg-green-500" className="w-full">
+              View Units
+            </ButtonLink>
+          </div>
 
-          <ButtonLink href="/units" color="bg-green-500">
-            View Units
-          </ButtonLink>
-
-          <ButtonLink href="/ip-list" color="bg-yellow-500">
-            Available IP
-          </ButtonLink>
+          {/* Right column - Inventory button */}
+          <div className="flex flex-col flex-1 gap-4">
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">
+              Inventory
+            </h2>
+            <ButtonLink
+              href="/inventory"
+              color="bg-purple-500"
+              className="w-full"
+            >
+              Inventory
+            </ButtonLink>
+          </div>
         </div>
       </div>
     </div>

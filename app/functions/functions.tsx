@@ -99,3 +99,97 @@ export function paginate<T>(
   const startIndex = (currentPage - 1) * itemsPerPage;
   return items.slice(startIndex, startIndex + itemsPerPage);
 }
+
+/**
+ * Validates input to prevent problematic special characters for API endpoints and trailing spaces
+ * @param {string} value - The input value to validate
+ * @param {boolean} allowAllSpecialChars - Whether to skip special character validation (default: false)
+ * @param {string} fieldName - Name of the field being validated for error messages
+ * @returns {{ isValid: boolean, sanitizedValue: string, errorMessage: string }} Validation result
+ */
+export const validateInput = (
+  value: string,
+  allowAllSpecialChars: boolean = false,
+  fieldName: string = "Input"
+): {
+  isValid: boolean;
+  sanitizedValue: string;
+  errorMessage: string;
+} => {
+  // Handle empty values
+  if (!value) {
+    return {
+      isValid: true,
+      sanitizedValue: "",
+      errorMessage: "",
+    };
+  }
+
+  // Trim trailing spaces
+  const trimmedValue = value.trim();
+
+  // Check if original value had trailing spaces
+  const hadTrailingSpace = value !== trimmedValue;
+
+  let isValid = true;
+  let errorMessage = "";
+
+  // Check for problematic special characters if not allowed
+  if (!allowAllSpecialChars) {
+    // Only block characters that would cause problems with API endpoints
+    // Block: /, ?, &, =, #, :, %, +, ', ", \, ;, <, >
+    const problematicCharsRegex = /[/?&=#:%+'"\\;<>]/;
+    const hasProblematicChars = problematicCharsRegex.test(trimmedValue);
+
+    if (hasProblematicChars) {
+      isValid = false;
+      errorMessage = `${fieldName} contains characters that are not allowed (/ ? & = # : % + ' " \\ ; < >)`;
+    }
+  }
+
+  // Add a note about trailing spaces if they were removed
+  if (hadTrailingSpace && isValid) {
+    errorMessage = "Trailing spaces removed";
+  }
+
+  return {
+    isValid,
+    sanitizedValue: trimmedValue,
+    errorMessage,
+  };
+};
+
+/**
+ * Validates an input field name to ensure it's valid for database usage and API endpoints
+ * More strict validation for key fields like name
+ * @param {string} name - The name to validate
+ * @returns {{ isValid: boolean, sanitizedValue: string, errorMessage: string }} Validation result
+ */
+export const validateName = (
+  name: string
+): {
+  isValid: boolean;
+  sanitizedValue: string;
+  errorMessage: string;
+} => {
+  // Trim trailing spaces
+  const trimmedName = name.trim();
+
+  // Only block characters that would cause problems with API endpoints
+  // Block: /, ?, &, =, #, :, %, +, ', ", \, ;, <, >
+  const problematicCharsRegex = /[/?&=#:%+'"\\;<>]/;
+  if (problematicCharsRegex.test(trimmedName)) {
+    return {
+      isValid: false,
+      sanitizedValue: trimmedName,
+      errorMessage:
+        "Name contains characters that are not allowed (/ ? & = # : % + ' \" \\ ; < >)",
+    };
+  }
+
+  return {
+    isValid: true,
+    sanitizedValue: trimmedName,
+    errorMessage: "",
+  };
+};

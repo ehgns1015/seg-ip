@@ -26,7 +26,7 @@ const UnitDetailModal: React.FC<UnitDetailModalProps> = ({ unit, onClose }) => {
   const { employeeFields, machineFields } = getFieldOrder();
 
   const handleEdit = () => {
-    router.push(`/units/edit/${unit.name}`);
+    router.push(`/ip-list/units/edit/${unit.name}`);
   };
 
   const excludedFields = ["name", "_id", "type", "note", "__v"];
@@ -39,7 +39,7 @@ const UnitDetailModal: React.FC<UnitDetailModalProps> = ({ unit, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-lg w-full max-w-md relative">
+      <div className="bg-white p-6 rounded-lg w-full max-w-2xl relative">
         <h3 className="text-2xl font-bold mb-4">{unit.name}</h3>
 
         {/* Display regular unit details */}

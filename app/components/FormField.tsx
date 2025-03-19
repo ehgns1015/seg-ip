@@ -12,7 +12,13 @@ interface FormFieldProps {
   type?: string;
   options?: Array<{ value: string; label: string }>;
   validationMessage?: string;
+  error?: string;
   required?: boolean;
+  onBlur?: (
+    e: React.FocusEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => void;
 }
 
 /**
@@ -30,9 +36,16 @@ const FormField: React.FC<FormFieldProps> = ({
   type = "text",
   options,
   validationMessage,
+  error,
   required = false,
+  onBlur,
 }) => {
   const label = labeling(name);
+
+  // Common class for input field with error state
+  const inputClass = `w-full p-2 border rounded ${
+    error ? "border-red-500" : ""
+  }`;
 
   if (type === "textarea") {
     return (
@@ -46,13 +59,15 @@ const FormField: React.FC<FormFieldProps> = ({
           name={name}
           value={value as string}
           onChange={onChange}
-          className="w-full p-2 border rounded resize-vertical"
+          onBlur={onBlur}
+          className={`${inputClass} resize-vertical`}
           rows={4}
           required={required}
         />
         {validationMessage && (
           <p className="text-sm mt-2 text-gray-600">{validationMessage}</p>
         )}
+        {error && <p className="text-sm mt-2 text-red-500">{error}</p>}
       </div>
     );
   }
@@ -88,7 +103,8 @@ const FormField: React.FC<FormFieldProps> = ({
           name={name}
           value={value as string}
           onChange={onChange}
-          className="w-full p-2 border rounded"
+          onBlur={onBlur}
+          className={inputClass}
           required={required}
         >
           <option value="">-- Select {label} --</option>
@@ -101,6 +117,7 @@ const FormField: React.FC<FormFieldProps> = ({
         {validationMessage && (
           <p className="text-sm mt-2 text-gray-600">{validationMessage}</p>
         )}
+        {error && <p className="text-sm mt-2 text-red-500">{error}</p>}
       </div>
     );
   }
@@ -117,12 +134,14 @@ const FormField: React.FC<FormFieldProps> = ({
         type={type}
         value={value as string}
         onChange={onChange}
-        className="w-full p-2 border rounded"
+        onBlur={onBlur}
+        className={inputClass}
         required={required}
       />
       {validationMessage && (
         <p className="text-sm mt-2 text-gray-600">{validationMessage}</p>
       )}
+      {error && <p className="text-sm mt-2 text-red-500">{error}</p>}
     </div>
   );
 };
