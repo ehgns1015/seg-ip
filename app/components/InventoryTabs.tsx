@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import type { Location } from "@/app/types/inventory";
 
 interface InventoryTabsProps {
