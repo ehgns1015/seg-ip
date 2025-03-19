@@ -20,16 +20,5 @@ const client = new MongoClient(MONGODB_URL);
  */
 const db = client.db(DB_NAME);
 
-/**
- * The MongoDB collection of units for IP management.
- */
-const units = db.collection("units");
-
-/**
- * The MongoDB collection for inventory management.
- * This collection stores information about inventory items across different locations.
- */
-const inventory = db.collection("inventory");
-
 // Export the client, database, and collections for use in other parts of the application
-export { client, db, units, inventory };
+export { client, db};

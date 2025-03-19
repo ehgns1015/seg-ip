@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { inventory } from "@/app/lib/mongo";
+import { db } from "@/app/lib/mongo";
 
+const inventory = db.collection("inventory");
 /**
  * Helper function to handle server errors consistently
  */

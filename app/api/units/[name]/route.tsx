@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { units } from "@/app/lib/mongo";
+import { db } from "@/app/lib/mongo";
 import { ObjectId } from "mongodb";
 
+
+const units = db.collection("units");
 /**
  * Helper function to handle server errors consistently
  *

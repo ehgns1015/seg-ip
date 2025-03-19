@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { units } from "@/app/lib/mongo";
+import { db } from "@/app/lib/mongo";
+
+const units = db.collection("units");
 
 // Define the regex directly in the server component to avoid import issues
 const IPv4Regex =

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
-import { units } from "@/app/lib/mongo";
+import { db } from "@/app/lib/mongo";
+
+const units = db.collection("units");
 
 // Enforces dynamic rendering for this API route
 export const dynamic = "force-dynamic";
