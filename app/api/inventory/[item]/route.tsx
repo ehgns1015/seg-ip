@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/mongo";
 
+// Get the inventory collection
 const inventory = db.collection("inventory");
+
 /**
  * Helper function to handle server errors consistently
  */
@@ -73,9 +75,9 @@ export async function PUT(
     // Set the current timestamp
     const now = new Date();
 
-    // Trim the note if provided
+    // Remove trailing spaces only if note is provided
     const trimmedNote =
-      note !== undefined ? note.trim() : existingItem.note || "";
+      note !== undefined ? note.replace(/\s+$/, "") : existingItem.note || "";
 
     // Prepare the updated item data
     const updatedItem = {

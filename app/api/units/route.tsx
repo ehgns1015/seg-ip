@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/mongo";
 
+// Get the units collection
 const units = db.collection("units");
 
 // Enforces dynamic rendering for this API route
@@ -45,8 +46,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
+    // Remove trailing spaces from name
+    const trimmedName = name.replace(/\s+$/, "");
+
+    // Check for invalid characters in name
+    const problematicCharsRegex = /[/?&=#:%+'"\\;<>]/;
+    if (problematicCharsRegex.test(trimmedName)) {
+      return NextResponse.json(
+        {
+          error:
+            "Name contains characters that are not allowed (/ ? & = # : % + ' \" \\ ; < >)",
+        },
+        { status: 400 }
+      );
+    }
+
     // Check if a unit with the same name already exists
-    const existingName = await units.findOne({ name });
+    const existingName = await units.findOne({ name: trimmedName });
     if (existingName) {
       return NextResponse.json(
         { error: "Name already exists" },
@@ -83,13 +99,21 @@ export async function POST(req: Request) {
       }
     }
 
+    // Process string fields in rest to remove trailing spaces
+    const sanitizedRest = { ...rest };
+    Object.entries(rest).forEach(([key, value]) => {
+      if (typeof value === "string") {
+        sanitizedRest[key] = value.replace(/\s+$/, "");
+      }
+    });
+
     // Prepare the new unit object with the provided data
     const newUnit = {
-      name,
+      name: trimmedName,
       ip: finalIp || "",
       sharedComputer: sharedComputer || false,
       primaryUser: sharedComputer ? primaryUser : null,
-      ...rest,
+      ...sanitizedRest,
     };
 
     // Insert the new unit into the database

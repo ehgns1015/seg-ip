@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/mongo";
 
+// Get the inventory collection
 const inventory = db.collection("inventory");
+
 // Enforces dynamic rendering for this API route
 export const dynamic = "force-dynamic";
 
@@ -73,9 +75,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // Trim whitespace from string fields
-    const trimmedItem = item.trim();
-    const trimmedNote = note ? note.trim() : "";
+    // Remove trailing spaces from string fields - keep other spaces intact
+    const trimmedItem = item.replace(/\s+$/, "");
+    const trimmedNote = note ? note.replace(/\s+$/, "") : "";
 
     // Check if item already exists in the specified location
     const existingItem = await inventory.findOne({

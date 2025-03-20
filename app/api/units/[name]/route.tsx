@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { db } from "@/app/lib/mongo";
 import { ObjectId } from "mongodb";
 
-
+// Get the units collection
 const units = db.collection("units");
+
 /**
  * Helper function to handle server errors consistently
  *
@@ -63,10 +64,25 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unit not found" }, { status: 404 });
     }
 
+    // Remove trailing spaces from name if provided
+    const trimmedName = name ? name.replace(/\s+$/, "") : existingUnit.name;
+
+    // Check for invalid characters in name
+    const problematicCharsRegex = /[/?&=#:%+'"\\;<>]/;
+    if (problematicCharsRegex.test(trimmedName)) {
+      return NextResponse.json(
+        {
+          error:
+            "Name contains characters that are not allowed (/ ? & = # : % + ' \" \\ ; < >)",
+        },
+        { status: 400 }
+      );
+    }
+
     // Check for name duplication when name is changing
-    if (name && name !== existingUnit.name) {
+    if (trimmedName && trimmedName !== existingUnit.name) {
       const duplicateName = await units.findOne({
-        name: name,
+        name: trimmedName,
         _id: { $ne: objectId },
       });
 
@@ -140,13 +156,21 @@ export async function PUT(req: Request) {
       finalPrimaryUser = primaryUser || existingUnit.primaryUser;
     }
 
+    // Process rest properties to remove trailing spaces from string values
+    const sanitizedRest = { ...rest };
+    Object.entries(rest).forEach(([key, value]) => {
+      if (typeof value === "string") {
+        sanitizedRest[key] = value.replace(/\s+$/, "");
+      }
+    });
+
     // Prepare the updated unit data
     const updatedUnit = {
-      name: name || existingUnit.name,
+      name: trimmedName,
       ip: finalIp || existingUnit.ip,
       sharedComputer: finalSharedComputer,
       primaryUser: finalPrimaryUser,
-      ...rest,
+      ...sanitizedRest,
     };
 
     // Update the unit in the database

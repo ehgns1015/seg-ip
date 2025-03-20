@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { IPv4Regex, useIPValidation } from "@/app/hooks/useIPValidation";
-import {
-  validateInput,
-  validateName,
-  labeling,
-} from "@/app/functions/functions";
 import type { FormData } from "@/app/types";
 import { apiService } from "@/app/services/api";
 import FormField from "./FormField";
@@ -51,7 +46,6 @@ const UnitForm: React.FC<UnitFormProps> = ({
     }
   );
   const [error, setError] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
   const [employees, setEmployees] = useState<
     Array<{ name: string; ip: string }>
   >([]);
@@ -105,72 +99,31 @@ const UnitForm: React.FC<UnitFormProps> = ({
 
   /**
    * Handles form submission.
-   * Validates all fields, then sends a POST/PUT request to save the unit data.
+   * Sends a POST/PUT request to save the unit data and redirects to the units page on success.
    */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Reset errors
-    setError("");
-    setFieldErrors({});
-
-    // Validate the name field first (most important)
-    const nameValidation = validateName(formData.name);
-    if (!nameValidation.isValid) {
-      setFieldErrors({ name: nameValidation.errorMessage });
-      setError("Please correct the errors before submitting");
-      return;
-    }
-
-    // If needed, update the sanitized name
-    if (formData.name !== nameValidation.sanitizedValue) {
-      setFormData((prevData) => ({
-        ...prevData,
-        name: nameValidation.sanitizedValue,
-      }));
-    }
-
-    // Prepare the validated data
-    const validatedData: FormData = {
-      ...formData,
-      name: nameValidation.sanitizedValue,
-    };
-
-    // Validate all other string fields and trim trailing spaces
-    let hasErrors = false;
-    Object.entries(formData).forEach(([key, value]) => {
-      if (typeof value === "string" && key !== "name") {
-        const { isValid, sanitizedValue, errorMessage } = validateInput(
-          value,
-          // Allow special characters in some fields
-          ["note", "email"].includes(key),
-          labeling(key)
-        );
-
-        if (!isValid) {
-          setFieldErrors((prev) => ({ ...prev, [key]: errorMessage }));
-          hasErrors = true;
-        }
-
-        validatedData[key] = sanitizedValue;
-      }
-    });
-
-    if (hasErrors) {
-      setError("Please correct the errors before submitting");
-      return;
-    }
-
     try {
+      // Create a copy of form data and trim string values
+      const trimmedData = { ...formData };
+
+      // Trim all string fields to remove trailing spaces
+      Object.keys(trimmedData).forEach((key) => {
+        if (typeof trimmedData[key] === "string") {
+          trimmedData[key] = trimmedData[key].trim();
+        }
+      });
+
       if (mode === "create") {
-        await apiService.createUnit({ ...validatedData, type });
+        await apiService.createUnit({ ...trimmedData, type });
       } else if (mode === "edit" && initialData?.name) {
         // Create a properly typed dataToSubmit object
         const dataToSubmit: FormData = {
-          ...validatedData,
+          ...trimmedData,
           // Ensure primaryUser is null (not empty string) when sharedComputer is false
-          primaryUser: validatedData.sharedComputer
-            ? validatedData.primaryUser
+          primaryUser: trimmedData.sharedComputer
+            ? trimmedData.primaryUser
             : null,
         };
         await apiService.updateUnit(initialData.name, dataToSubmit);
@@ -186,7 +139,6 @@ const UnitForm: React.FC<UnitFormProps> = ({
       clearErrorAfterDelay();
     }
   };
-
   /**
    * Handles delete operation for an existing unit.
    */
@@ -204,7 +156,7 @@ const UnitForm: React.FC<UnitFormProps> = ({
 
   /**
    * Handles input field changes.
-   * Updates form data and performs validation when fields are modified.
+   * Updates form data and performs IP validation when the IP address is modified.
    */
   const handleChange = useCallback(
     (
@@ -213,15 +165,6 @@ const UnitForm: React.FC<UnitFormProps> = ({
       >
     ) => {
       const { name, value, type } = e.target;
-
-      // Clear error for this field when user starts typing again
-      if (fieldErrors[name]) {
-        setFieldErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors[name];
-          return newErrors;
-        });
-      }
 
       if (name === "sharedComputer") {
         const isChecked = (e.target as HTMLInputElement).checked;
@@ -232,17 +175,7 @@ const UnitForm: React.FC<UnitFormProps> = ({
           // if sharedComputer is false, clear primaryUser
           primaryUser: isChecked ? prevData.primaryUser : "",
         }));
-      } else if (name === "name" && typeof value === "string") {
-        // Special validation for name field
-        const { sanitizedValue } = validateName(value);
-
-        setFormData((prevData) => ({
-          ...prevData,
-          [name]: sanitizedValue,
-        }));
       } else {
-        // For other fields, just update with the current value
-        // (We'll validate fully on submit or blur)
         setFormData((prevData) => ({
           ...prevData,
           [name]:
@@ -266,47 +199,7 @@ const UnitForm: React.FC<UnitFormProps> = ({
         }, 700);
       }
     },
-    [checkDuplicateIP, setIPValidationMessage, fieldErrors]
-  );
-
-  /**
-   * Handles field blur to validate on the spot
-   */
-  const handleBlur = useCallback(
-    (
-      e: React.FocusEvent<
-        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      >
-    ) => {
-      const { name, value } = e.target;
-
-      if (typeof value === "string") {
-        if (name === "name") {
-          const { isValid, sanitizedValue, errorMessage } = validateName(value);
-
-          if (!isValid) {
-            setFieldErrors((prev) => ({ ...prev, [name]: errorMessage }));
-          }
-
-          // Update with sanitized value
-          setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
-        } else {
-          const { isValid, sanitizedValue, errorMessage } = validateInput(
-            value,
-            ["note", "email"].includes(name),
-            labeling(name)
-          );
-
-          if (!isValid) {
-            setFieldErrors((prev) => ({ ...prev, [name]: errorMessage }));
-          }
-
-          // Update with sanitized value
-          setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
-        }
-      }
-    },
-    []
+    [checkDuplicateIP, setIPValidationMessage]
   );
 
   /**
@@ -355,13 +248,11 @@ const UnitForm: React.FC<UnitFormProps> = ({
               name={field.name}
               value={formData.primaryUser || ""}
               onChange={handleChange}
-              onBlur={handleBlur}
               type="select"
               options={employees.map((emp) => ({
                 value: emp.name,
                 label: `${emp.name} (${emp.ip})`,
               }))}
-              error={fieldErrors[field.name]}
               required
             />
           );
@@ -379,9 +270,7 @@ const UnitForm: React.FC<UnitFormProps> = ({
                   : ""
               }
               onChange={handleChange}
-              onBlur={handleBlur}
               type="textarea"
-              error={fieldErrors[field.name]}
             />
           );
         }
@@ -397,12 +286,10 @@ const UnitForm: React.FC<UnitFormProps> = ({
                 : ""
             }
             onChange={handleChange}
-            onBlur={handleBlur}
             type={field.type}
             validationMessage={
               field.name === "ip" ? IPValidationMessage : undefined
             }
-            error={fieldErrors[field.name]}
             required={"name".includes(field.name)}
           />
         );
@@ -414,10 +301,8 @@ const UnitForm: React.FC<UnitFormProps> = ({
     type,
     formData,
     handleChange,
-    handleBlur,
     IPValidationMessage,
     employees,
-    fieldErrors,
   ]);
 
   return (

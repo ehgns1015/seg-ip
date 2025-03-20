@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/mongo";
 
+// Get the units collection
 const units = db.collection("units");
 
 // Define the regex directly in the server component to avoid import issues

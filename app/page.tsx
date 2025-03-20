@@ -70,7 +70,11 @@ export default function Home() {
             <h2 className="text-xl font-semibold text-gray-700 mb-2">
               IP Management
             </h2>
-            <ButtonLink href="/create" color="bg-blue-500" className="w-full">
+            <ButtonLink
+              href="/ip-list/units/create"
+              color="bg-blue-500"
+              className="w-full"
+            >
               Create New
             </ButtonLink>
             <ButtonLink
@@ -80,7 +84,11 @@ export default function Home() {
             >
               Available IP
             </ButtonLink>
-            <ButtonLink href="/units" color="bg-green-500" className="w-full">
+            <ButtonLink
+              href="/ip-list/units/"
+              color="bg-green-500"
+              className="w-full"
+            >
               View Units
             </ButtonLink>
           </div>
