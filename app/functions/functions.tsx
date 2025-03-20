@@ -105,14 +105,10 @@ export function paginate<T>(
  * This function allows all characters including spaces.
  *
  * @param {string} value - The input value to validate
- * @param {boolean} allowAllSpecialChars - Not used, kept for backward compatibility
- * @param {string} fieldName - Name of the field being validated for error messages
  * @returns {{ isValid: boolean, sanitizedValue: string, errorMessage: string }} Validation result
  */
 export const validateInput = (
-  value: string,
-  allowAllSpecialChars: boolean = true,
-  fieldName: string = "Input"
+  value: string
 ): {
   isValid: boolean;
   sanitizedValue: string;
