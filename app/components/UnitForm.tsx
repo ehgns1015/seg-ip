@@ -132,7 +132,7 @@ const UnitForm: React.FC<UnitFormProps> = ({
       if (onSuccess) {
         onSuccess();
       } else {
-        router.push("/units");
+        router.push("/ip-list/units");
       }
     } catch (error) {
       setError(apiService.handleError(error));
@@ -147,7 +147,7 @@ const UnitForm: React.FC<UnitFormProps> = ({
 
     try {
       await apiService.deleteUnit(initialData.name);
-      router.push("/units");
+      router.push("/ip-list/units");
     } catch (error) {
       setError(apiService.handleError(error));
       clearErrorAfterDelay();
