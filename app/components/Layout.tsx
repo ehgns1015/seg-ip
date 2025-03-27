@@ -43,7 +43,7 @@ const Layout: React.FC<LayoutProps> = ({
 
         {showCreateButton && (
           <Link
-            href="/create"
+            href="/ip-list/units/create"
             className="w-32 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 text-center"
           >
             Create New

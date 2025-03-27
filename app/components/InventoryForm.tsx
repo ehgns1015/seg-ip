@@ -159,7 +159,7 @@ const InventoryForm: React.FC<InventoryFormProps> = ({
           className="h-4 w-4 text-blue-600 border-gray-300 rounded"
         />
         <label htmlFor="EOS" className="ml-2 block text-sm text-gray-900">
-          End of Stock (EOS)
+          End of Service (EOS)
         </label>
       </div>
 
@@ -184,6 +184,23 @@ const InventoryForm: React.FC<InventoryFormProps> = ({
             </option>
           ))}
         </select>
+      </div>
+
+      <div>
+        <label
+          htmlFor="note"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Note
+        </label>
+        <textarea
+          id="note"
+          name="note"
+          value={formData.note}
+          onChange={handleChange}
+          rows={4}
+          className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+        />
       </div>
 
       <div className="flex space-x-4">

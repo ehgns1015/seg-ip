@@ -105,6 +105,13 @@ export default function Home() {
             >
               Inventory
             </ButtonLink>
+            <ButtonLink
+              href="/inventory/cablestock"
+              color="bg-indigo-500"
+              className="w-full"
+            >
+              Cable Stock
+            </ButtonLink>
           </div>
         </div>
       </div>

@@ -23,8 +23,8 @@ const FIELD_LABELS: Record<string, string> = {
   printer2: "Printer#2",
   scanner: "Scanner",
   PLC: "PLC",
-  username: "Windows Username",
-  pw: "Windows Password",
+  username: "Username",
+  pw: "Password",
   line: "Line",
   sharedComputer: "Shared Computer",
   primaryUser: "Primary User",
@@ -108,7 +108,7 @@ export function paginate<T>(
  * @returns {{ isValid: boolean, sanitizedValue: string, errorMessage: string }} Validation result
  */
 export const validateInput = (
-  value: string
+  value: string,
 ): {
   isValid: boolean;
   sanitizedValue: string;
