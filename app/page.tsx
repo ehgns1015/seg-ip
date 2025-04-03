@@ -93,20 +93,14 @@ export default function Home() {
             </ButtonLink>
           </div>
 
-          {/* Right column - Inventory button */}
+          {/* Right column - Stock button */}
           <div className="flex flex-col flex-1 gap-4">
-            <h2 className="text-xl font-semibold text-gray-700 mb-2">
-              Inventory
-            </h2>
-            <ButtonLink
-              href="/inventory"
-              color="bg-purple-500"
-              className="w-full"
-            >
-              Inventory
+            <h2 className="text-xl font-semibold text-gray-700 mb-2">Inventory</h2>
+            <ButtonLink href="/stock" color="bg-purple-500" className="w-full">
+              Stock
             </ButtonLink>
             <ButtonLink
-              href="/inventory/cablestock"
+              href="/stock/cablestock"
               color="bg-indigo-500"
               className="w-full"
             >

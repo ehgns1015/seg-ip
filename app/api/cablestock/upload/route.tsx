@@ -1,4 +1,3 @@
-// app/api/cablestock/upload/route.tsx
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/mongo";
 import * as XLSX from "xlsx";
@@ -38,7 +37,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const [_, month, day, year] = fileNameMatch;
+    const [, month, , year] = fileNameMatch;
     const monthKey = `${month}/${year}`;
 
     // Process the file

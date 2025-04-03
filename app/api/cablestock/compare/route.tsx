@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/app/lib/mongo";
-import { ConsumptionItem } from "@/app/types/cablestock";
+import { ConsumptionItem, CableStockItem } from "@/app/types/cablestock";
 
 const cablestockCollection = db.collection("cablestock");
 
@@ -38,9 +38,9 @@ export async function GET(req: Request) {
 
     // Calculate consumption
     const consumptionData: ConsumptionItem[] = fromData.items.map(
-      (fromItem: any) => {
+      (fromItem: CableStockItem) => {
         const toItem = toData.items.find(
-          (item: any) => item.type === fromItem.type
+          (item: CableStockItem) => item.type === fromItem.type
         );
 
         return {

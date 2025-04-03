@@ -14,10 +14,10 @@ const cablestockCollection = db.collection("cablestock");
  */
 export async function GET(
   req: Request,
-  { params }: { params: { month: string } }
+  { params }: { params: Promise<{ month: string }> }
 ) {
   try {
-    const { month } = params;
+    const { month } = await params;
 
     // Retrieve month data
     const data = await cablestockCollection.findOne({ month });
